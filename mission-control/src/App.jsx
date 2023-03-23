@@ -3,7 +3,6 @@ import reactLogo from './assets/react.svg'
 import './App.css'
 import React from 'react'
 import { render } from 'react-dom'
-import axios from 'axios';
 
 
 const CLIENT_ID = "2c5bb24506ae43338c9a497fb5a29782"
@@ -12,12 +11,14 @@ const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
 const RESPONSE_TYPE = "token"
 const scopes = "user-read-private user-read-email user-read-currently-playing"
 
-
+// GETS WEATHER DATA FROM A WEATHER API AND CREATES A PROMISE USING AWAIT
 async function fetchWeatherData(){
   const data = await fetch("https://api.weather.gov/gridpoints/MTR/86,95/forecast")
   return (data.json())
 }
 
+// FETCHES SPOTIFY DATA FROM AN API URL AND AUTHENTICATES
+// GETS TOKEN FROM HASH (SEE FURTHER DOWN IN CODE), AND PASSES TOKEN TO AUTH
 async function fetchSpotifyData(token){
   const spotify = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
     method:'get',
@@ -31,7 +32,7 @@ async function fetchSpotifyData(token){
 
 
 
-
+// WEATHER AND TIME-BASED GREETING COMPONENT
 export default class App extends React.Component {
   constructor(props){
     super(props)
@@ -40,7 +41,7 @@ export default class App extends React.Component {
       
     }
   }
-  
+  // GETS DATA AND EXTRACTS IMPORTANT PARTS
   updateWeatherData(){
     fetchWeatherData().then(data=>{
       console.log(data)
@@ -52,7 +53,7 @@ export default class App extends React.Component {
       console.log(this.state.temp)
     })
   }  
-
+  //SETS INTERVAL FOR CALLING API
   componentDidMount(){
     this.updateWeatherData()
     setInterval(this.updateWeatherData,100000)
@@ -61,7 +62,7 @@ export default class App extends React.Component {
   render(){
     let greeting;
  
-
+    //CHANGES GREETING BASED ON TIME
     if (this.state.currentTime < 12) {
       greeting = 'Good Morning 🌞';
     } else if (this.state.currentTime < 18) {
@@ -87,12 +88,15 @@ export default class App extends React.Component {
     )
   }
 }
+
+// QUOTE RANDOMIZING COMPONENT
 class Quotes extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       quote: null,
     };
+    // DICT OF QUOTES, ARTISTS, SONGS
     this.quotes = {
       "i get everything i want 'cause i attract it": {
         artist: "Ariana Grande",
@@ -124,7 +128,7 @@ class Quotes extends React.Component {
       },
     };
   }
-
+  // GETS RANDOM QUOTE
   getQuote() {
     const quotesKeys = Object.keys(this.quotes);
     const randomQuote = this.quotes[quotesKeys[Math.floor(Math.random() * quotesKeys.length)]];
@@ -133,7 +137,7 @@ class Quotes extends React.Component {
       quote: randomQuote,
     });
   }
-
+  //DISPLAYS RANDOM QUOTE
   render() {
     const { quote } = this.state;
     return (
@@ -167,16 +171,17 @@ class Spotify extends React.Component {
       }
     }
   }
-
+  // GETS SPOTIFY DATA BY CALLING API AND THEN EXTRACTS TITLE, COVER & ARTIST FROM JSON
   getSpotifyData(token){
     fetchSpotifyData(token).then(data=>{
       const title = `${data?.item?.name} by ${data?.item?.artists?.[0]?.name}`;
       const cover = `${data.item?.album?.images?.[0]?.url}`;
       const artist = `${data?.item?.artists?.[0]?.name}`;
+      //I ADDED THE CONSOLE.LOGS TO TEST MY CODE
       console.log(title);
       console.log(cover);
       console.log(data);
-      console.log("test")
+      console.log("getSpotifyData is working!!")
       console.log(artist)
       this.setState({
         title: title,
@@ -188,10 +193,10 @@ class Spotify extends React.Component {
 
 
  componentDidMount() {
-
+  // SETS INTERVAL FOR UPDATE
   this.getSpotifyData(this.state.token)
   setInterval(this.getSpotifyData,100000)
-
+ // TOKEN AUTH CODE
   let token = window.localStorage.getItem("token");
   const hash = window.location.hash;
   
@@ -214,10 +219,12 @@ class Spotify extends React.Component {
     }
   }
 
-
+  //RENDERS TITLE, ARTIST, ALBUM COVER, ETC.
   render() {
     const { logout, token, title, cover, artist} = this.state;
     // console.log(token);
+
+    // DECIDES (TOTALLY OBJECTIVE) RATING OF SLAYFULNESS BASED ON ARTIST
     let slayfulness = "0%";
     if ((artist ===
       "Ariana Grande")||(artist ===
@@ -250,7 +257,7 @@ class Spotify extends React.Component {
             slayfulness = "42%";
           }
     
-    
+    //RENDERS & RETURNS JSX DATA FOR SPOTIFY COMPONENT
     return (
       <div>
         <style>
