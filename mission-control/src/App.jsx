@@ -19,26 +19,26 @@ async function fetchWeatherData(){
 }
 
 async function fetchSpotifyData(token){
-  const spotify = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+  const data = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
     method:'get',
     headers: new Headers({
       'Authorization':'Bearer ' + token,
     }),
   })
-  return (spotify.json())
+  return (data.json())
   
 }
 
-async function fetchAudioFeatures(token){
-  const audio = await fetch("https://api.spotify.com/v1/audio-features/2SLwbpExuoBDZBpjfefCtV", {
-    method:'get',
-    headers: new Headers({
-      'Authorization':'Bearer ' + token,
-    }),
-  })
-  return (audio.json())
+// async function fetchAudioFeatures(token){
+//   const audio = await fetch("https://api.spotify.com/v1/audio-features/2SLwbpExuoBDZBpjfefCtV", {
+//     method:'get',
+//     headers: new Headers({
+//       'Authorization':'Bearer ' + token,
+//     }),
+//   })
+//   return (audio.json())
   
-}
+// }
 
 
 
@@ -164,6 +164,8 @@ class Quotes extends React.Component {
 
 class Spotify extends React.Component {
 
+hasSpotifyData = false;
+
   constructor(props){
     super(props)
     this.state={
@@ -185,7 +187,7 @@ class Spotify extends React.Component {
       console.log(title);
       console.log(cover);
       console.log(data);
-      console.log("test")
+      console.log("test");
       this.setState({
         title: title,
         cover: cover,
@@ -193,23 +195,23 @@ class Spotify extends React.Component {
     }).catch(error=>console.log(error));
   }
 
-  getAudioFeatures(token){
-    fetchAudioFeatures(token, this.state.recentIDs).then(data=>{
-      const danceability = data.danceability;
-      console.log(data);
-      console.log(danceability);
-      this.setState({
-        danceability: danceability,
-      })
-    })
-  }
+  // getAudioFeatures(token){
+  //   fetchAudioFeatures(token, this.state.recentIDs).then(data=>{
+  //     const danceability = data.danceability;
+  //     console.log(data);
+  //     console.log(danceability);
+  //     this.setState({
+  //       danceability: danceability,
+  //     })
+  //   })
+  // }
 
  componentDidMount() {
 
   this.getSpotifyData(this.state.token)
   setInterval(this.getSpotifyData,100000)
-  this.getAudioFeatures(this.state.token)
-  setInterval(this.getAudioFeatures,100000)
+  // this.getAudioFeatures(this.state.token)
+  // setInterval(this.getAudioFeatures,100000)
 
   let token = window.localStorage.getItem("token");
   const hash = window.location.hash;
@@ -228,9 +230,10 @@ class Spotify extends React.Component {
 }
 
   componentDidUpdate(){
-    if (this.state.token != null) {
+    if (this.state.token != null && !this.hasSpotifyData) {
         this.getSpotifyData(this.state.token)
-        this.getAudioFeatures(this.state.token)
+        this.hasSpotifyData = true;
+        // this.getAudioFeatures(this.state.token)
     }
   }
 
