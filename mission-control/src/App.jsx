@@ -19,26 +19,16 @@ async function fetchWeatherData(){
 }
 
 async function fetchSpotifyData(token){
-  const data = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+  const spotify = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
     method:'get',
     headers: new Headers({
       'Authorization':'Bearer ' + token,
     }),
   })
-  return (data.json())
+  return (spotify.json())
   
 }
 
-// async function fetchAudioFeatures(token){
-//   const audio = await fetch("https://api.spotify.com/v1/audio-features/2SLwbpExuoBDZBpjfefCtV", {
-//     method:'get',
-//     headers: new Headers({
-//       'Authorization':'Bearer ' + token,
-//     }),
-//   })
-//   return (audio.json())
-  
-// }
 
 
 
@@ -73,18 +63,18 @@ export default class App extends React.Component {
  
 
     if (this.state.currentTime < 12) {
-      greeting = 'Good Morning';
+      greeting = 'Good Morning 🌞';
     } else if (this.state.currentTime < 18) {
-      greeting = 'Good Afternoon';
+      greeting = 'Good Afternoon 😎';
     } else if (this.state.currentTime < 22) {
-      greeting = 'Good Evening';
+      greeting = 'Good Evening ⭐️';
     } else {
-      greeting = 'Good Night';
+      greeting = 'Good Night 🌚';
     }
   
     return (
       <div className="App">
-        <h1>{greeting} 🫡</h1>
+        <h1>{greeting} </h1>
         <h2>the temperature is {this.state.temp} degrees</h2>
         <p> {this.state.forecast} </p>
         <div className="card">
@@ -164,8 +154,6 @@ class Quotes extends React.Component {
 
 class Spotify extends React.Component {
 
-hasSpotifyData = false;
-
   constructor(props){
     super(props)
     this.state={
@@ -184,34 +172,25 @@ hasSpotifyData = false;
     fetchSpotifyData(token).then(data=>{
       const title = `${data?.item?.name} by ${data?.item?.artists?.[0]?.name}`;
       const cover = `${data.item?.album?.images?.[0]?.url}`;
+      const artist = `${data?.item?.artists?.[0]?.name}`;
       console.log(title);
       console.log(cover);
       console.log(data);
-      console.log("test");
+      console.log("test")
+      console.log(artist)
       this.setState({
         title: title,
         cover: cover,
+        artist: artist,
       });
     }).catch(error=>console.log(error));
   }
 
-  // getAudioFeatures(token){
-  //   fetchAudioFeatures(token, this.state.recentIDs).then(data=>{
-  //     const danceability = data.danceability;
-  //     console.log(data);
-  //     console.log(danceability);
-  //     this.setState({
-  //       danceability: danceability,
-  //     })
-  //   })
-  // }
 
  componentDidMount() {
 
   this.getSpotifyData(this.state.token)
   setInterval(this.getSpotifyData,100000)
-  // this.getAudioFeatures(this.state.token)
-  // setInterval(this.getAudioFeatures,100000)
 
   let token = window.localStorage.getItem("token");
   const hash = window.location.hash;
@@ -230,17 +209,48 @@ hasSpotifyData = false;
 }
 
   componentDidUpdate(){
-    if (this.state.token != null && !this.hasSpotifyData) {
+    if (this.state.token != null) {
         this.getSpotifyData(this.state.token)
-        this.hasSpotifyData = true;
-        // this.getAudioFeatures(this.state.token)
     }
   }
 
 
   render() {
-    const { logout, token, title, cover, danceability } = this.state;
+    const { logout, token, title, cover, artist} = this.state;
     // console.log(token);
+    let slayfulness = "0%";
+    if ((artist ===
+      "Ariana Grande")||(artist ===
+        "Taylor Swift")||(artist ===
+          "SZA")||(artist ===
+            "Doja Cat")||(artist ===
+              "Rihanna")||(artist ===
+                "Beyoncé"))
+      {
+        slayfulness = "100%";
+      }
+    if ((artist ===
+        "BTS")||(artist ===
+          "Kali Uchis")||(artist ===
+            "Nicki Minaj")||(artist ===
+              "The Weeknd")||(artist ===
+                "Megan Thee Stallion")||(artist ===
+                  "TAEMIN"))
+        {
+          slayfulness = "76%";
+        }
+    if ((artist ===
+          "Lizzo")||(artist ===
+            "Frank Ocean")||(artist ===
+              "Drake")||(artist ===
+                "BLACKPINK")||(artist ===
+                  "Ice Spice")||(artist ===
+                    "Cardi B"))
+          {
+            slayfulness = "42%";
+          }
+    
+    
     return (
       <div>
         <style>
@@ -251,6 +261,7 @@ hasSpotifyData = false;
           : <button onClick={logout}>log out</button>}
           <h2>now playing: {title}</h2>
           <img className='albumcover' src={cover}/>
+          <p>slayfulness = {slayfulness}</p>
       </div>
     );
   }
